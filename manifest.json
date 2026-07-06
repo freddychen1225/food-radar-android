@@ -1,0 +1,35 @@
+{
+  "id": "/food-radar-android/",
+  "name": "美食雷達 Android版",
+  "short_name": "美食雷達",
+  "description": "美食雷達 Android版是一款免費的 Google Maps 智慧搜尋工具，提供正餐、下午茶與特殊需求快速搜尋。",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "start_url": "/food-radar-android/?source=pwa",
+  "scope": "/food-radar-android/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#ff8a00",
+  "background_color": "#f7f9fc",
+  "categories": ["food", "lifestyle", "navigation"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

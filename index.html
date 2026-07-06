@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>美食雷達 Android版</title>
+
+    <meta name="description" content="美食雷達 Android版 (Food Radar) 是一款免費的 Google Maps 智慧搜尋工具。解決今天吃什麼的煩惱，提供隨機美食推薦、平價正餐搜尋及下午茶點心建議。">
+    <meta name="keywords" content="美食雷達, 今天吃什麼, 附近美食, Google Maps 搜尋, 平價美食, 下午茶推薦, 隨機選餐廳, 親子餐廳, 寵物友善, Android App">
+    <meta name="author" content="Freddy">
+
+    <meta property="og:title" content="美食雷達 Android版 - 今天吃什麼？">
+    <meta property="og:description" content="快速找到附近想吃的類型，直接打開 Google Maps 搜尋。">
+    <meta property="og:image" content="https://freddychen1225.github.io/food-radar-android/icons/icon-512.png">
+    <meta property="og:url" content="https://freddychen1225.github.io/food-radar-android/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_TW">
+
+    <meta name="google-site-verification" content="NQhtyIlgmyy8RmQKDZDP-OYrJlMlkIsO3RromfSEclw">
+
+    <meta name="theme-color" content="#ff8a00">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="美食雷達">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="美食雷達">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
+    <link rel="apple-touch-icon" href="icons/icon-512.png">
+
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --drink-color: #e67e22;
+            --special-color: #6c5ce7;
+            --random-color: #9b59b6;
+            --bg-color: #f7f9fc;
+            --text-color: #2d3436;
+            --line-color: #06c755;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overscroll-behavior-y: none;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            align-self: flex-start;
+            margin: 20px 0 10px 0;
+            padding-left: 5px;
+            border-left: 4px solid var(--primary-color);
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .mode-switch {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 5px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 12px 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mode-btn.active-meal {
+            background-color: #fff0f0;
+            color: var(--primary-color);
+            box-shadow: 0 2px 5px rgba(255, 107, 107, 0.2);
+        }
+
+        .mode-btn.active-drink {
+            background-color: #fff5e6;
+            color: var(--drink-color);
+            box-shadow: 0 2px 5px rgba(230, 126, 34, 0.2);
+        }
+
+        .mode-btn.active-special {
+            background-color: #f0eeff;
+            color: var(--special-color);
+            box-shadow: 0 2px 5px rgba(108, 92, 231, 0.2);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .grid-container.scenarios {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px 5px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary-color);
+            background-color: #fff0f0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .icon {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        body.drink-mode .option-btn.selected {
+            border-color: var(--drink-color);
+            background-color: #fff5e6;
+            color: var(--drink-color);
+        }
+
+        body.special-mode .option-btn.selected {
+            border-color: var(--special-color);
+            background-color: #f0eeff;
+            color: var(--special-color);
+        }
+
+        #special-notice {
+            display: none;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--special-color);
+            margin-top: 25px;
+            margin-bottom: 5px;
+            line-height: 1.6;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        body.special-mode #special-notice {
+            display: block;
+        }
+
+        .action-area {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 50px;
+            padding: 15px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        #search-btn {
+            flex: 2;
+            background-color: var(--primary-color);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        body.drink-mode #search-btn {
+            background-color: var(--drink-color);
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+        }
+
+        body.special-mode #search-btn {
+            background-color: var(--special-color);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        #random-btn {
+            flex: 1.2;
+            background-color: var(--random-color);
+            box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+        }
+
+        body.special-mode #random-btn {
+            display: none;
+        }
+
+        .counter-box {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #888;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 40px;
+            padding-bottom: 20px;
+            font-size: 1rem;
+            color: #888;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .footer-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        @keyframes pulse-btn {
+            0% { transform: scale(1); box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5); }
+            100% { transform: scale(1); box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3); }
+        }
+
+        .share-btn-footer,
+        .support-btn-footer {
+            background-color: var(--line-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 8px rgba(6, 199, 85, 0.3);
+            transition: all 0.2s;
+        }
+
+        .support-btn-footer {
+            background-color: #ff6b6b;
+            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+            animation: pulse-btn 2s infinite ease-in-out;
+        }
+
+        .support-btn-footer:hover {
+            animation: none;
+            transform: scale(1.05);
+        }
+
+        .footer-credit {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .footer-credit a {
+            color: #888;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .footer-credit a:hover {
+            color: var(--primary-color);
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+            padding: 20px;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background: white;
+            width: 100%;
+            max-width: 320px;
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-main,
+        .btn-line,
+        .btn-cancel {
+            border: none;
+            padding: 12px;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .btn-main {
+            background: var(--primary-color);
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .btn-line {
+            background: var(--line-color);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .btn-cancel {
+            background: #f1f2f6;
+            color: #7f8fa6;
+            font-size: 1rem;
+        }
+
+        .ios-share-icon {
+            font-size: 1.5rem;
+            vertical-align: middle;
+            margin: 0 5px;
+            color: #007aff;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .support-modal-content {
+            animation: popIn 0.3s ease-out;
+            background: white;
+            width: 100%;
+            max-width: 380px;
+            padding: 25px;
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .support-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #aaa;
+            line-height: 20px;
+        }
+
+        .support-box {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .grid-container.scenarios {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .option-btn {
+                min-height: 78px;
+                font-size: 0.92rem;
+            }
+
+            .action-area {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📍 美食雷達 Android版</h1>
+    <div class="subtitle">Google Map 智慧快搜</div>
+
+    <div class="mode-switch">
+        <button class="mode-btn active-meal" id="btn-meal" onclick="switchMode('meal')">🍱 找正餐</button>
+        <button class="mode-btn" id="btn-drink" onclick="switchMode('drink')">🧋 下午茶</button>
+        <button class="mode-btn" id="btn-special" onclick="switchMode('special')">✨ 特殊</button>
+    </div>
+
+    <div class="section-title">1. 用餐情境</div>
+    <div class="grid-container scenarios" id="scenario-container">
+        <button class="option-btn selected" data-keyword="" onclick="selectScenario(this)">
+            <span class="icon">🍴</span>隨便吃吃
+        </button>
+        <button class="option-btn" data-keyword="適合單人" onclick="selectScenario(this)">
+            <span class="icon">👤</span>1人獨享
+        </button>
+        <button class="option-btn" data-keyword="氣氛" onclick="selectScenario(this)">
+            <span class="icon">👥</span>2人約會
+        </button>
+        <button class="option-btn" data-keyword="聚餐" onclick="selectScenario(this)">
+            <span class="icon">👨‍👩‍👧‍👦</span>多人聚餐
+        </button>
+    </div>
+
+    <div class="section-title" id="type-title">2. 想吃什麼？</div>
+    <div class="grid-container" id="cuisine-container"></div>
+
+    <div id="special-notice">
+        本區「特殊」類別搜尋後<br>
+        請自行確認符合需求再前往消費喔
+    </div>
+
+    <div class="action-area">
+        <button id="search-btn" class="action-btn" onclick="goSearch()">
+            🔍 搜尋
+        </button>
+        <button id="random-btn" class="action-btn" onclick="goRandom()">
+            🎲 幫我選
+        </button>
+    </div>
+
+    <div class="counter-box">
+        已有 <span id="busuanzi_value_site_pv">載入中...</span> 人享用美食了
+    </div>
+
+    <div class="footer">
+        <div class="footer-buttons">
+            <button class="share-btn-footer" onclick="shareToFriend('general')">
+                💬 推薦朋友
+            </button>
+            <button class="support-btn-footer" onclick="openSupportModal()">
+                ☕ 支持作者
+            </button>
+        </div>
+        <div class="footer-credit">
+            <a href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">Freddy</a> & Gemini 3 Pro 設計協作
+        </div>
+    </div>
+
+    <div id="android-guide" class="overlay" onclick="this.classList.remove('show')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-title">🎉 已成功安裝</div>
+            <div class="modal-text" style="margin-bottom:15px;">
+                你已將美食雷達加入裝置。<br>
+                現在可以像一般 App 一樣直接使用。
+            </div>
+            <button class="btn-main" onclick="document.getElementById('android-guide').classList.remove('show')">我知道了</button>
+        </div>
+    </div>
+
+    <div id="ios-guide" class="overlay">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-title">😋 餓肚子不能等！</div>
+            <div class="modal-text" style="text-align: left; font-size: 1rem;">
+                把雷達加到桌面，下次肚子餓時，比別人<b>快 10 秒</b>找到吃的！<br><br>
+                1. 點擊瀏覽器下方的 <span class="ios-share-icon">📤</span> 分享按鈕<br>
+                2. 往下滑找到「加入主畫面」<span class="ios-share-icon">➕</span><br>
+                3. 點擊右上角「加入」
+            </div>
+            <button class="btn-main" onclick="closeIOSGuide()">我知道了</button>
+        </div>
+    </div>
+
+    <div id="random-result-modal" class="overlay" onclick="this.classList.remove('show')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-title">✨ 命運的選擇 ✨</div>
+            <div class="modal-text" id="random-result-text" style="font-size: 1.3rem; font-weight: bold; color: #333; margin: 20px 0;">
+                牛肉麵
+            </div>
+            <div class="modal-btn-group">
+                <button class="btn-main" id="btn-go-random">🚀 出發！</button>
+                <button class="btn-line" id="btn-share-random">💬 傳 LINE 解救朋友</button>
+                <button class="btn-cancel" onclick="document.getElementById('random-result-modal').classList.remove('show')">再轉一次</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="supportModal" class="overlay">
+        <div class="support-modal-content" onclick="event.stopPropagation()">
+            <div class="support-close" onclick="closeSupportModal()">&times;</div>
+            <h3 style="margin: 5px 0 10px; color: #333; text-align: center;">支持美食雷達 🎯</h3>
+
+            <div style="background: #fff8e1; border-radius: 10px; padding: 12px; margin-bottom: 15px; border: 1px solid #ffe082;">
+                <p style="text-align: center; color: #f57c00; font-weight: bold; margin: 0 0 8px; font-size: 14px;">
+                    👇 請選擇您想贊助的心意 👇
+                </p>
+                <div style="display: flex; justify-content: space-between; gap: 5px; font-size: 13px; color: #555;">
+                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 1px solid #eee;">
+                        🍵 青茶<br><strong style="color: #ff6b6b; font-size: 15px;">$30</strong>
+                    </div>
+                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 2px solid #ff6b6b; position: relative;">
+                        <span style="position: absolute; top: -8px; right: -5px; background: #ff6b6b; color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px;">推薦</span>
+                        🍚 滷肉飯<br><strong style="color: #ff6b6b; font-size: 15px;">$60</strong>
+                    </div>
+                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 1px solid #eee;">
+                        🍱 便當<br><strong style="color: #ff6b6b; font-size: 15px;">$100</strong>
+                    </div>
+                </div>
+                <p style="font-size: 11px; color: #999; text-align: center; margin: 8px 0 0;">
+                    當然，任何金額都是巨大的鼓勵！❤️
+                </p>
+            </div>
+
+            <div class="support-box" style="background: #FFF0F0; border-color: #FFD0D0;">
+                <div style="font-weight: bold; color: #D02020; margin-bottom: 8px; font-size: 15px;">街口支付 JKOPay</div>
+
+                <a id="jkoLink" href="#" style="text-decoration: none;">
+                    <button type="button" style="width: 100%; background: #E63838; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <span>🚀 開啟街口 APP 贊助</span>
+                    </button>
+                </a>
+
+                <div style="font-size: 13px; color: #888; margin-top: 10px;">
+                    <span id="qrHint" style="font-weight: bold; color: #d02020;">[ 請打開街口支付掃描 ]</span><br>
+                    <img src="./images/jko_qr.jpg" alt="街口 QR Code" style="width: 140px; margin-top: 8px; border-radius: 8px; border: 1px solid #eee;">
+                    <div style="font-size: 12px; color: #999; margin-top: 6px; line-height: 1.4;">
+                        手機可截圖存至相簿<br>
+                        再由街口 APP 打開掃描讀取照片
+                    </div>
+                </div>
+            </div>
+
+            <div class="support-box" style="background: #F0F7FF; border-color: #D0E0FF;">
+                <div style="font-weight: bold; color: #0066CC; margin-bottom: 8px; font-size: 15px;">銀行轉帳</div>
+
+                <div style="background: white; padding: 10px; border-radius: 6px; border: 1px dashed #B0C4DE; text-align: left; margin-bottom: 8px;">
+                    <div style="font-size: 14px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px;">
+                        銀行代碼請選：<strong style="color: #d63031; font-size: 16px;">108 陽信銀行</strong>
+                    </div>
+
+                    <div style="font-size: 12px; color: #666; margin-top: 4px;">銀行帳號：</div>
+                    <div id="bankAccount" style="font-size: 18px; font-weight: bold; color: #333; letter-spacing: 1px; font-family: monospace;">036027500401</div>
+                </div>
+
+                <button onclick="copyAccount()" style="width: 100%; background: #0066CC; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold;">
+                    📋 複製帳號
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const myTwqrString = "TWQRP%3a%2f%2f%e5%80%8b%e4%ba%ba%e8%bd%89%e5%b8%b3%2f158%2f02%2fV1%3fD5%3d396%26D6%3d0000000900615072%26D10%3d901%26D97%3d20251212151945%26D98%3d39601527998570300000001%26D99%3dABA414E1";
+
+        const mealCategories = [
+            { name: "牛肉麵", icon: "🍜" },
+            { name: "便當簡餐", icon: "🍱" },
+            { name: "小吃/麵店", icon: "🍢" },
+            { name: "滷味", icon: "🥘" },
+            { name: "水餃/鍋貼", icon: "🥟" },
+            { name: "火鍋", icon: "🍲" },
+            { name: "鐵板燒", icon: "👨‍🍳" },
+            { name: "牛排", icon: "🥩" },
+            { name: "義大利麵", icon: "🍝" },
+            { name: "漢堡/速食", icon: "🍔" },
+            { name: "日式料理", icon: "🍣" },
+            { name: "韓式料理", icon: "🥘" },
+            { name: "泰式料理", icon: "🌶️" },
+            { name: "咖哩", icon: "🍛" },
+            { name: "早午餐", icon: "🥪" }
+        ];
+
+        const drinkCategories = [
+            { name: "手搖飲", icon: "🧋" },
+            { name: "咖啡廳", icon: "☕" },
+            { name: "炸雞/鹽酥雞", icon: "🍗" },
+            { name: "臭豆腐", icon: "👃" },
+            { name: "麵線", icon: "🍜" },
+            { name: "車輪餅", icon: "🥞" },
+            { name: "雞蛋糕", icon: "🥚" },
+            { name: "蔥油餅/抓餅", icon: "🌯" },
+            { name: "甜點", icon: "🍰" },
+            { name: "冰品", icon: "🍧" },
+            { name: "麵包", icon: "🍞" },
+            { name: "甜甜圈", icon: "🍩" },
+            { name: "章魚燒", icon: "🐙" }
+        ];
+
+        const specialCategories = [
+            { name: "素食", icon: "🥬" },
+            { name: "親子餐廳", icon: "👶" },
+            { name: "寵物友善餐廳", icon: "🐶" }
+        ];
+
+        let currentMode = "meal";
+        let selectedScenarioKeyword = "";
+        let selectedCuisineKeyword = "";
+
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator.standalone === true);
+        const SHARE_URL = "https://freddychen1225.github.io/food-radar-android/?openExternalBrowser=1";
+
+        document.addEventListener("DOMContentLoaded", function () {
+            renderCuisines(mealCategories);
+
+            const jkoLink = document.getElementById("jkoLink");
+            if (jkoLink) {
+                jkoLink.style.display = "none";
+            }
+
+            window.addEventListener("appinstalled", () => {
+                if (/Android/i.test(navigator.userAgent)) {
+                    document.getElementById("android-guide").classList.add("show");
+                }
+            });
+
+            checkIOSGuide();
+            setupBusuanziFallback();
+            registerServiceWorker();
+        });
+
+        function registerServiceWorker() {
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker.register("./sw.js")
+                        .then((registration) => {
+                            console.log("SW registered:", registration.scope);
+
+                            registration.onupdatefound = function () {
+                                console.log("Service Worker update found.");
+                            };
+                        })
+                        .catch((error) => {
+                            console.error("SW registration failed:", error);
+                        });
+                });
+            }
+        }
+
+        function setupBusuanziFallback() {
+            if (location.protocol === "file:") {
+                const counter = document.getElementById("busuanzi_value_site_pv");
+                if (counter) counter.textContent = "本機預覽不顯示";
+                return;
+            }
+
+            setTimeout(() => {
+                const counter = document.getElementById("busuanzi_value_site_pv");
+                if (counter && (counter.textContent === "載入中..." || counter.textContent === "...")) {
+                    counter.textContent = "暫時無法取得";
+                }
+            }, 4000);
+        }
+
+        function checkIOSGuide() {
+            if (isIOS && !isPWA && !localStorage.getItem("iosGuideShown")) {
+                let count = parseInt(localStorage.getItem("searchCount") || "0", 10);
+                if (count >= 3) {
+                    setTimeout(() => {
+                        document.getElementById("ios-guide").classList.add("show");
+                    }, 1000);
+                }
+            }
+        }
+
+        function closeIOSGuide() {
+            document.getElementById("ios-guide").classList.remove("show");
+            localStorage.setItem("iosGuideShown", "true");
+        }
+
+        function openSupportModal() {
+            document.getElementById("supportModal").classList.add("show");
+        }
+
+        function closeSupportModal() {
+            document.getElementById("supportModal").classList.remove("show");
+        }
+
+        function copyAccount() {
+            const text = document.getElementById("bankAccount").innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ 帳號已複製！\n請打開網銀 App 或 LINE Pay 進行轉帳");
+            }).catch(() => {
+                alert("❌ 複製失敗，請長按帳號手動複製");
+            });
+        }
+
+        document.getElementById("supportModal").onclick = function (e) {
+            if (e.target === this) closeSupportModal();
+        };
+
+        document.getElementById("ios-guide").onclick = function (e) {
+            if (e.target === this) closeIOSGuide();
+        };
+
+        function shareToFriend(type, foodName = "") {
+            let text = "";
+            let confirmMsg = "";
+
+            if (type === "general") {
+                text = `發現一個超好用的找美食工具！不用下載 App，打開就能用，專治選擇困難症！💊🍔\n\n${SHARE_URL}`;
+                confirmMsg = `您即將傳送以下訊息給朋友：\n\n「發現一個超好用的找美食工具！...」\n\n確定要開啟 LINE 嗎？`;
+            } else if (type === "random") {
+                text = `救星來了！命運決定吃「${foodName}」！以後吃飯不用再問吃什麼，直接用這個神器轉一下！🍱✨\n\n${SHARE_URL}`;
+                confirmMsg = `您即將傳送以下訊息給朋友：\n\n「救星來了！命運決定吃 ${foodName}！...」\n\n確定要開啟 LINE 嗎？`;
+            }
+
+            if (confirm(confirmMsg)) {
+                const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+                window.location.href = lineUrl;
+            }
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            const btnMeal = document.getElementById("btn-meal");
+            const btnDrink = document.getElementById("btn-drink");
+            const btnSpecial = document.getElementById("btn-special");
+            const body = document.body;
+
+            btnMeal.className = "mode-btn";
+            btnDrink.className = "mode-btn";
+            btnSpecial.className = "mode-btn";
+            body.classList.remove("drink-mode", "special-mode");
+
+            if (mode === "meal") {
+                btnMeal.className = "mode-btn active-meal";
+                renderCuisines(mealCategories);
+            } else if (mode === "drink") {
+                btnDrink.className = "mode-btn active-drink";
+                body.classList.add("drink-mode");
+                renderCuisines(drinkCategories);
+            } else if (mode === "special") {
+                btnSpecial.className = "mode-btn active-special";
+                body.classList.add("special-mode");
+                renderCuisines(specialCategories);
+            }
+
+            selectedCuisineKeyword = "";
+        }
+
+        function renderCuisines(list) {
+            const container = document.getElementById("cuisine-container");
+            container.innerHTML = "";
+
+            list.forEach(item => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.type = "button";
+                btn.innerHTML = `<span class="icon">${item.icon}</span>${item.name}`;
+                btn.dataset.name = item.name;
+
+                btn.addEventListener("click", function () {
+                    const allBtns = container.querySelectorAll(".option-btn");
+                    allBtns.forEach(b => b.classList.remove("selected"));
+                    this.classList.add("selected");
+                    selectedCuisineKeyword = item.name;
+                });
+
+                container.appendChild(btn);
+            });
+        }
+
+        function selectScenario(btn) {
+            const container = document.getElementById("scenario-container");
+            const allBtns = container.querySelectorAll(".option-btn");
+            allBtns.forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            selectedScenarioKeyword = btn.getAttribute("data-keyword");
+        }
+
+        function goSearch() {
+            if (!selectedCuisineKeyword) {
+                let typeName = "正餐";
+                if (currentMode === "drink") typeName = "點心";
+                if (currentMode === "special") typeName = "特殊需求";
+                const randomHint = currentMode === "special" ? "" : "，或按「🎲 幫我選」";
+                alert(`請先選擇${typeName}類型${randomHint}！`);
+                return;
+            }
+
+            performSearch(selectedCuisineKeyword);
+        }
+
+        function goRandom() {
+            if (currentMode === "special") return;
+
+            const container = document.getElementById("cuisine-container");
+            const options = container.querySelectorAll(".option-btn");
+            const randomIndex = Math.floor(Math.random() * options.length);
+            const selectedBtn = options[randomIndex];
+            const keyword = selectedBtn.dataset.name;
+
+            options.forEach(b => b.classList.remove("selected"));
+            selectedBtn.classList.add("selected");
+            selectedCuisineKeyword = keyword;
+
+            setTimeout(() => {
+                const modal = document.getElementById("random-result-modal");
+                document.getElementById("random-result-text").innerText = keyword;
+
+                document.getElementById("btn-go-random").onclick = function () {
+                    modal.classList.remove("show");
+                    performSearch(keyword);
+                };
+
+                document.getElementById("btn-share-random").onclick = function () {
+                    shareToFriend("random", keyword);
+                };
+
+                modal.classList.add("show");
+            }, 100);
+        }
+
+        function performSearch(keyword) {
+            let count = parseInt(localStorage.getItem("searchCount") || "0", 10);
+            localStorage.setItem("searchCount", count + 1);
+
+            let query = keyword;
+            if (selectedScenarioKeyword) {
+                query += " " + selectedScenarioKeyword;
+            }
+
+            const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
+
+            if (isIOS && isPWA) {
+                window.location.href = mapUrl;
+            } else {
+                window.open(mapUrl, "_blank", "noopener,noreferrer");
+            }
+        }
+    </script>
+</body>
+</html>
