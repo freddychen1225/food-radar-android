@@ -260,6 +260,40 @@
             display: none;
         }
 
+        .ad-banner-wrap {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ad-banner-label {
+            font-size: 0.78rem;
+            color: #999;
+            letter-spacing: 1px;
+        }
+
+        .ad-banner-box {
+            width: 100%;
+            max-width: 320px;
+            min-height: 100px;
+            background: #ffffff;
+            border: 1px dashed #d8d8d8;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.95rem;
+            text-align: center;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+
         .counter-box {
             margin-top: 15px;
             font-size: 0.9rem;
@@ -486,6 +520,13 @@
         <button id="random-btn" class="action-btn" onclick="goRandom()">
             🎲 幫我選
         </button>
+    </div>
+
+    <div class="ad-banner-wrap">
+        <div class="ad-banner-label">贊助廣告</div>
+        <div class="ad-banner-box">
+            <span>320 x 100 橫幅廣告預留區</span>
+        </div>
     </div>
 
     <div class="counter-box">
