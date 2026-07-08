@@ -43,6 +43,10 @@
             --bg-color: #f7f9fc;
             --text-color: #2d3436;
             --line-color: #06c755;
+            --cta-blue: #3b82f6;
+            --cta-green: #10b981;
+            --cta-soft-bg: #ffffff;
+            --cta-soft-border: #e7ebf1;
         }
 
         * {
@@ -260,38 +264,108 @@
             display: none;
         }
 
-        .ad-banner-wrap {
+        .smart-cta-wrap {
             width: 100%;
             max-width: 600px;
             margin-top: 18px;
             margin-bottom: 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
         }
 
-        .ad-banner-label {
-            font-size: 0.78rem;
-            color: #999;
-            letter-spacing: 1px;
-        }
-
-        .ad-banner-box {
+        .smart-cta-card {
             width: 100%;
-            max-width: 320px;
-            min-height: 100px;
-            background: #ffffff;
-            border: 1px dashed #d8d8d8;
-            border-radius: 14px;
+            background: var(--cta-soft-bg);
+            border: 1px solid var(--cta-soft-border);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .smart-cta-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .smart-cta-icon {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #999;
-            font-size: 0.95rem;
-            text-align: center;
-            padding: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            font-size: 1.3rem;
+            background: #f4f7fb;
+        }
+
+        .smart-cta-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .smart-cta-label {
+            font-size: 0.75rem;
+            color: #8b95a1;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .smart-cta-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #25313c;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .smart-cta-desc {
+            font-size: 0.9rem;
+            color: #66727f;
+            line-height: 1.5;
+        }
+
+        .smart-cta-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .smart-cta-btn,
+        .smart-cta-link {
+            border: none;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .smart-cta-btn {
+            background: var(--cta-blue);
+            color: white;
+        }
+
+        .smart-cta-btn.green {
+            background: var(--cta-green);
+        }
+
+        .smart-cta-link {
+            background: #eef4ff;
+            color: #3569c8;
+        }
+
+        .smart-cta-note {
+            margin-top: 10px;
+            font-size: 0.76rem;
+            color: #96a0aa;
+            line-height: 1.4;
         }
 
         .counter-box {
@@ -475,6 +549,23 @@
             .action-area {
                 max-width: 100%;
             }
+
+            .smart-cta-card {
+                padding: 13px;
+            }
+
+            .smart-cta-title {
+                font-size: 0.97rem;
+            }
+
+            .smart-cta-desc {
+                font-size: 0.88rem;
+            }
+
+            .smart-cta-btn,
+            .smart-cta-link {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -522,11 +613,8 @@
         </button>
     </div>
 
-    <div class="ad-banner-wrap">
-        <div class="ad-banner-label">贊助廣告</div>
-        <div class="ad-banner-box">
-            <span>320 x 100 橫幅廣告預留區</span>
-        </div>
+    <div class="smart-cta-wrap" id="smart-cta-wrap">
+        <div class="smart-cta-card" id="smart-cta-card"></div>
     </div>
 
     <div class="counter-box">
@@ -628,18 +716,20 @@
         let selectedCuisineKeyword = "";
 
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isPWA = window.matchMedia("(display-mode: standalone)").matches || (window.navigator.standalone === true);
+        const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator.standalone === true);
+        const isAndroid = /Android/i.test(navigator.userAgent);
         const SHARE_URL = "https://freddychen1225.github.io/food-radar-android/?openExternalBrowser=1";
 
         document.addEventListener("DOMContentLoaded", function () {
             renderCuisines(mealCategories);
 
             window.addEventListener("appinstalled", () => {
-                if (/Android/i.test(navigator.userAgent)) {
+                if (isAndroid) {
                     document.getElementById("android-guide").classList.add("show");
                 }
             });
 
+            renderSmartCTA();
             checkIOSGuide();
             setupBusuanziFallback();
             registerServiceWorker();
@@ -678,7 +768,7 @@
         }
 
         function checkIOSGuide() {
-            if (isIOS && !isPWA && !localStorage.getItem("iosGuideShown")) {
+            if (isIOS && !isStandalone && !localStorage.getItem("iosGuideShown")) {
                 let count = parseInt(localStorage.getItem("searchCount") || "0", 10);
                 if (count >= 3) {
                     setTimeout(() => {
@@ -697,6 +787,10 @@
             if (e.target === this) closeIOSGuide();
         };
 
+        function openIOSInstallGuide() {
+            document.getElementById("ios-guide").classList.add("show");
+        }
+
         function shareToFriend(type, foodName = "") {
             let text = "";
             let confirmMsg = "";
@@ -713,6 +807,83 @@
                 const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
                 window.location.href = lineUrl;
             }
+        }
+
+        function renderSmartCTA() {
+            const card = document.getElementById("smart-cta-card");
+
+            if (isIOS && !isStandalone) {
+                card.innerHTML = `
+                    <div class="smart-cta-top">
+                        <div class="smart-cta-icon">📱</div>
+                        <div class="smart-cta-content">
+                            <div class="smart-cta-label">自家推薦</div>
+                            <div class="smart-cta-title">加入 iPhone 主畫面，像 App 一樣直接打開</div>
+                            <div class="smart-cta-desc">下次肚子餓時，不用再打開 Safari 找網址，從桌面一點就能用。</div>
+                        </div>
+                    </div>
+                    <div class="smart-cta-actions">
+                        <button class="smart-cta-btn" onclick="openIOSInstallGuide()">立即查看加入教學</button>
+                        <button class="smart-cta-link" onclick="shareToFriend('general')">💬 推薦朋友</button>
+                    </div>
+                    <div class="smart-cta-note">這個版位可依裝置顯示不同內容，之後也可加入合作推薦入口。</div>
+                `;
+                return;
+            }
+
+            if (isStandalone) {
+                card.innerHTML = `
+                    <div class="smart-cta-top">
+                        <div class="smart-cta-icon">💬</div>
+                        <div class="smart-cta-content">
+                            <div class="smart-cta-label">自家推薦</div>
+                            <div class="smart-cta-title">已經安裝好了，順手分享給也有選擇障礙的朋友</div>
+                            <div class="smart-cta-desc">你現在用的就是桌面版體驗，把它分享出去，就是最直接的成效展示。</div>
+                        </div>
+                    </div>
+                    <div class="smart-cta-actions">
+                        <button class="smart-cta-btn green" onclick="shareToFriend('general')">💬 立即推薦朋友</button>
+                        <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">👀 看更多作品</a>
+                    </div>
+                    <div class="smart-cta-note">後續可把這裡換成合作推薦、小收益連結或品牌展示入口。</div>
+                `;
+                return;
+            }
+
+            if (isAndroid) {
+                card.innerHTML = `
+                    <div class="smart-cta-top">
+                        <div class="smart-cta-icon">🚀</div>
+                        <div class="smart-cta-content">
+                            <div class="smart-cta-label">自家推薦</div>
+                            <div class="smart-cta-title">Android 可直接用 APK / App 版本，體驗更像原生工具</div>
+                            <div class="smart-cta-desc">這個位置未來可放合作推薦、優惠入口，作為工具型網站的低干擾變現展示。</div>
+                        </div>
+                    </div>
+                    <div class="smart-cta-actions">
+                        <button class="smart-cta-btn green" onclick="shareToFriend('general')">💬 分享這個工具</button>
+                        <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">🤝 合作展示入口</a>
+                    </div>
+                    <div class="smart-cta-note">* 這裡也可以替換成聯盟連結或商家合作連結，作為小收益示範版位。</div>
+                `;
+                return;
+            }
+
+            card.innerHTML = `
+                <div class="smart-cta-top">
+                    <div class="smart-cta-icon">✨</div>
+                    <div class="smart-cta-content">
+                        <div class="smart-cta-label">自家推薦</div>
+                        <div class="smart-cta-title">這是一個可同時服務網頁、PWA 與 APK 的美食小工具</div>
+                        <div class="smart-cta-desc">你現在看到的是示範型自家 CTA 版位，之後可延伸成合作推薦與變現入口。</div>
+                    </div>
+                </div>
+                <div class="smart-cta-actions">
+                    <button class="smart-cta-btn" onclick="shareToFriend('general')">💬 推薦朋友</button>
+                    <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">👀 查看作者頁</a>
+                </div>
+                <div class="smart-cta-note">* 後續可在不影響主功能的前提下，加入合作推薦連結與揭露文字。</div>
+            `;
         }
 
         function switchMode(mode) {
@@ -827,7 +998,7 @@
 
             const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
 
-            if (isIOS && isPWA) {
+            if (isIOS && isStandalone) {
                 window.location.href = mapUrl;
             } else {
                 window.open(mapUrl, "_blank", "noopener,noreferrer");
