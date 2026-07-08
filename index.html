@@ -456,26 +456,26 @@
         .modal-card {
             background: white;
             width: 100%;
-            max-width: 320px;
+            max-width: 360px;
             border-radius: 20px;
-            padding: 25px 20px;
+            padding: 22px 18px;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             position: relative;
         }
 
         .modal-title {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: bold;
             color: var(--primary-color);
             margin-bottom: 10px;
         }
 
         .modal-text {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #333;
-            margin-bottom: 25px;
-            line-height: 1.5;
+            margin-bottom: 18px;
+            line-height: 1.55;
         }
 
         .modal-btn-group {
@@ -498,7 +498,7 @@
         .btn-main {
             background: var(--primary-color);
             color: white;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
 
         .btn-line {
@@ -513,11 +513,37 @@
             font-size: 1rem;
         }
 
-        .ios-share-icon {
-            font-size: 1.5rem;
-            vertical-align: middle;
-            margin: 0 5px;
-            color: #007aff;
+        .ios-video-wrap {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #f3f4f6;
+            margin-bottom: 14px;
+            border: 1px solid #eceff3;
+        }
+
+        .ios-video-wrap video {
+            width: 100%;
+            display: block;
+            background: #f3f4f6;
+        }
+
+        .ios-guide-steps {
+            text-align: left;
+            font-size: 0.95rem;
+            color: #4b5563;
+            line-height: 1.7;
+            background: #fafbfc;
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+        }
+
+        .ios-guide-note {
+            font-size: 0.82rem;
+            color: #9aa3ad;
+            margin-bottom: 14px;
+            line-height: 1.5;
         }
 
         .sr-only {
@@ -635,7 +661,7 @@
     <div id="android-guide" class="overlay" onclick="this.classList.remove('show')">
         <div class="modal-card" onclick="event.stopPropagation()">
             <div class="modal-title">🎉 已成功安裝</div>
-            <div class="modal-text" style="margin-bottom:15px;">
+            <div class="modal-text">
                 你已將美食雷達加入裝置。<br>
                 現在可以像一般 App 一樣直接使用。
             </div>
@@ -645,13 +671,32 @@
 
     <div id="ios-guide" class="overlay">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-title">😋 餓肚子不能等！</div>
-            <div class="modal-text" style="text-align: left; font-size: 1rem;">
-                把雷達加到桌面，下次肚子餓時，比別人<b>快 10 秒</b>找到吃的！<br><br>
-                1. 點擊瀏覽器下方的 <span class="ios-share-icon">📤</span> 分享按鈕<br>
-                2. 往下滑找到「加入主畫面」<span class="ios-share-icon">➕</span><br>
-                3. 點擊右上角「加入」
+            <div class="modal-title">📱 iPhone 加入主畫面教學</div>
+
+            <div class="ios-video-wrap">
+                <video
+                    id="ios-install-video"
+                    controls
+                    muted
+                    playsinline
+                    preload="metadata"
+                    poster="ios-install-poster-2.jpg"
+                >
+                    <source src="ios-install-guide.mp4" type="video/mp4">
+                    您的瀏覽器不支援影片播放。
+                </video>
             </div>
+
+            <div class="ios-guide-steps">
+                1. 點擊 Safari 下方的「分享」按鈕。<br>
+                2. 往下找到「加入主畫面」。<br>
+                3. 點右上角「加入」，就完成了。
+            </div>
+
+            <div class="ios-guide-note">
+                影片若未自動播放，可直接按下播放鍵觀看完整教學。
+            </div>
+
             <button class="btn-main" onclick="closeIOSGuide()">我知道了</button>
         </div>
     </div>
@@ -789,6 +834,10 @@
 
         function openIOSInstallGuide() {
             document.getElementById("ios-guide").classList.add("show");
+            const video = document.getElementById("ios-install-video");
+            if (video) {
+                video.currentTime = 0;
+            }
         }
 
         function shareToFriend(type, foodName = "") {
@@ -826,7 +875,7 @@
                         <button class="smart-cta-btn" onclick="openIOSInstallGuide()">立即查看加入教學</button>
                         <button class="smart-cta-link" onclick="shareToFriend('general')">💬 推薦朋友</button>
                     </div>
-                    <div class="smart-cta-note">這個版位可依裝置顯示不同內容，之後也可加入合作推薦入口。</div>
+                    <div class="smart-cta-note">這個版位會依裝置顯示不同內容，之後也可加入合作推薦入口。</div>
                 `;
                 return;
             }
@@ -853,18 +902,18 @@
             if (isAndroid) {
                 card.innerHTML = `
                     <div class="smart-cta-top">
-                        <div class="smart-cta-icon">🚀</div>
+                        <div class="smart-cta-icon">📦</div>
                         <div class="smart-cta-content">
-                            <div class="smart-cta-label">自家推薦</div>
-                            <div class="smart-cta-title">Android 可直接用 APK / App 版本，體驗更像原生工具</div>
-                            <div class="smart-cta-desc">這個位置未來可放合作推薦、優惠入口，作為工具型網站的低干擾變現展示。</div>
+                            <div class="smart-cta-label">Android 專屬</div>
+                            <div class="smart-cta-title">想分享給 Android 朋友？這裡有中文 APK 下載頁</div>
+                            <div class="smart-cta-desc">用中文說明下載與安裝流程，比直接進英文頁面更容易理解。</div>
                         </div>
                     </div>
                     <div class="smart-cta-actions">
-                        <button class="smart-cta-btn green" onclick="shareToFriend('general')">💬 分享這個工具</button>
-                        <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">🤝 合作展示入口</a>
+                        <a class="smart-cta-btn green" href="download.html">📥 前往 APK 下載頁</a>
+                        <button class="smart-cta-link" onclick="shareDownloadPage()">💬 傳給朋友下載</button>
                     </div>
-                    <div class="smart-cta-note">* 這裡也可以替換成聯盟連結或商家合作連結，作為小收益示範版位。</div>
+                    <div class="smart-cta-note">* 之後也可把這裡延伸成合作推薦或小收益入口。</div>
                 `;
                 return;
             }
@@ -880,10 +929,21 @@
                 </div>
                 <div class="smart-cta-actions">
                     <button class="smart-cta-btn" onclick="shareToFriend('general')">💬 推薦朋友</button>
-                    <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">👀 查看作者頁</a>
+                    <a class="smart-cta-link" href="download.html">📥 APK 下載頁</a>
                 </div>
                 <div class="smart-cta-note">* 後續可在不影響主功能的前提下，加入合作推薦連結與揭露文字。</div>
             `;
+        }
+
+        function shareDownloadPage() {
+            const downloadUrl = "https://freddychen1225.github.io/food-radar-android/download.html";
+            const text = `這是美食雷達 V3.6 的 Android 下載頁，裡面有中文安裝說明，給你參考：\n\n${downloadUrl}`;
+            const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
+
+            if (confirm(confirmMsg)) {
+                const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+                window.location.href = lineUrl;
+            }
         }
 
         function switchMode(mode) {
