@@ -694,7 +694,7 @@
             </div>
 
             <div class="ios-guide-note">
-                影片若未自動播放，可直接按下播放鍵觀看完整教學。
+                影片播放前會先顯示封面圖；若未自動播放，可直接按下播放鍵觀看完整教學。
             </div>
 
             <button class="btn-main" onclick="closeIOSGuide()">我知道了</button>
@@ -764,6 +764,9 @@
         const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator.standalone === true);
         const isAndroid = /Android/i.test(navigator.userAgent);
         const SHARE_URL = "https://freddychen1225.github.io/food-radar-android/?openExternalBrowser=1";
+
+        /* 沒有安裝 LINE 時，可先用 true 測試分享訊息內容 */
+        const ANDROID_SHARE_TEST_MODE = true;
 
         document.addEventListener("DOMContentLoaded", function () {
             renderCuisines(mealCategories);
@@ -911,9 +914,9 @@
                     </div>
                     <div class="smart-cta-actions">
                         <a class="smart-cta-btn green" href="download.html">📥 前往 APK 下載頁</a>
-                        <button class="smart-cta-link" onclick="shareDownloadPage()">💬 傳給朋友下載</button>
+                        <button class="smart-cta-link" onclick="shareDownloadPage()">💬 測試 / 傳給朋友</button>
                     </div>
-                    <div class="smart-cta-note">* 之後也可把這裡延伸成合作推薦或小收益入口。</div>
+                    <div class="smart-cta-note">若手機尚未安裝 LINE，目前會先顯示測試訊息內容與最終分享網址。</div>
                 `;
                 return;
             }
@@ -938,10 +941,24 @@
         function shareDownloadPage() {
             const downloadUrl = "https://freddychen1225.github.io/food-radar-android/download.html";
             const text = `這是美食雷達 V3.6 的 Android 下載頁，裡面有中文安裝說明，給你參考：\n\n${downloadUrl}`;
-            const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
 
+            console.log("Android 分享文字：", text);
+            console.log("LINE 分享連結：", lineUrl);
+
+            if (ANDROID_SHARE_TEST_MODE) {
+                alert(
+                    "【測試模式】目前不直接開啟 LINE。\n\n" +
+                    "準備分享的訊息如下：\n\n" +
+                    text +
+                    "\n\n----------------------\nLINE 分享連結：\n" +
+                    lineUrl
+                );
+                return;
+            }
+
+            const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
             if (confirm(confirmMsg)) {
-                const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
                 window.location.href = lineUrl;
             }
         }
