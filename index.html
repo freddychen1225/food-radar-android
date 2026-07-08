@@ -513,7 +513,43 @@
             font-size: 1rem;
         }
 
-        .ios-video-wrap {
+        #ios-guide {
+            align-items: flex-start;
+            padding: max(24px, env(safe-area-inset-top) + 18px) 16px 24px;
+            overflow-y: auto;
+        }
+
+        #ios-guide .modal-card {
+            position: relative;
+            margin: 0 auto;
+            margin-top: 18px;
+            max-width: 380px;
+            max-height: calc(100dvh - env(safe-area-inset-top) - 40px);
+            overflow-y: auto;
+            border-radius: 20px;
+        }
+
+        .modal-close {
+            position: sticky;
+            top: 0;
+            margin-left: auto;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.96);
+            color: #333;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        }
+
+        .ios-video-shell {
             width: 100%;
             border-radius: 16px;
             overflow: hidden;
@@ -522,10 +558,48 @@
             border: 1px solid #eceff3;
         }
 
-        .ios-video-wrap video {
+        .ios-video-cover {
+            position: relative;
             width: 100%;
+            padding: 0;
+            border: none;
+            background: #000;
+            cursor: pointer;
             display: block;
-            background: #f3f4f6;
+        }
+
+        .ios-video-cover img {
+            width: 100%;
+            aspect-ratio: 9 / 16;
+            object-fit: cover;
+            display: block;
+        }
+
+        .ios-play {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            width: 68px;
+            height: 68px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+        }
+
+        .ios-video-player {
+            width: 100%;
+            max-height: min(62dvh, 560px);
+            background: #000;
+            display: none;
+        }
+
+        .ios-video-player.show {
+            display: block;
         }
 
         .ios-guide-steps {
@@ -592,6 +666,19 @@
             .smart-cta-link {
                 width: 100%;
             }
+
+            #ios-guide {
+                padding: max(18px, env(safe-area-inset-top) + 12px) 12px 20px;
+            }
+
+            #ios-guide .modal-card {
+                margin-top: 10px;
+                max-width: 100%;
+            }
+
+            .ios-video-player {
+                max-height: 56dvh;
+            }
         }
     </style>
 </head>
@@ -649,7 +736,7 @@
 
     <div class="footer">
         <div class="footer-buttons">
-            <button class="share-btn-footer" onclick="shareToFriend('general')">
+            <button class="share-btn-footer" onclick="handleFooterShare()">
                 💬 推薦朋友
             </button>
         </div>
@@ -671,16 +758,22 @@
 
     <div id="ios-guide" class="overlay">
         <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeIOSGuide()" aria-label="關閉教學">✕</button>
+
             <div class="modal-title">📱 iPhone 加入主畫面教學</div>
 
-            <div class="ios-video-wrap">
+            <div class="ios-video-shell" id="ios-video-shell">
+                <button class="ios-video-cover" id="ios-video-cover" onclick="playIOSVideo()" aria-label="播放 iPhone 安裝教學">
+                    <img src="ios-install-poster-2.jpg" alt="iPhone 安裝教學封面">
+                    <span class="ios-play">▶</span>
+                </button>
+
                 <video
                     id="ios-install-video"
                     controls
-                    muted
                     playsinline
-                    preload="metadata"
-                    poster="ios-install-poster-2.jpg"
+                    preload="none"
+                    class="ios-video-player"
                 >
                     <source src="ios-install-guide.mp4" type="video/mp4">
                     您的瀏覽器不支援影片播放。
@@ -694,7 +787,7 @@
             </div>
 
             <div class="ios-guide-note">
-                影片播放前會先顯示封面圖；若未自動播放，可直接按下播放鍵觀看完整教學。
+                已改為封面圖模式，避免 Safari 對 poster 顯示不穩；右上角可隨時關閉教學。
             </div>
 
             <button class="btn-main" onclick="closeIOSGuide()">我知道了</button>
@@ -765,7 +858,7 @@
         const isAndroid = /Android/i.test(navigator.userAgent);
         const SHARE_URL = "https://freddychen1225.github.io/food-radar-android/?openExternalBrowser=1";
 
-        /* 沒有安裝 LINE 時，可先用 true 測試分享訊息內容 */
+        /* Android 測試模式：true = 先顯示測試訊息，不直接跳 LINE */
         const ANDROID_SHARE_TEST_MODE = true;
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -781,6 +874,7 @@
             checkIOSGuide();
             setupBusuanziFallback();
             registerServiceWorker();
+            bindIOSVideoEvents();
         });
 
         function registerServiceWorker() {
@@ -820,28 +914,73 @@
                 let count = parseInt(localStorage.getItem("searchCount") || "0", 10);
                 if (count >= 3) {
                     setTimeout(() => {
-                        document.getElementById("ios-guide").classList.add("show");
+                        openIOSInstallGuide();
                     }, 1000);
                 }
             }
         }
 
+        function bindIOSVideoEvents() {
+            const video = document.getElementById("ios-install-video");
+            if (!video) return;
+
+            video.addEventListener("ended", function () {
+                const closeBtn = document.querySelector(".modal-close");
+                if (closeBtn) closeBtn.focus();
+            });
+        }
+
+        function openIOSInstallGuide() {
+            document.getElementById("ios-guide").classList.add("show");
+
+            const video = document.getElementById("ios-install-video");
+            const cover = document.getElementById("ios-video-cover");
+
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+                video.classList.remove("show");
+            }
+
+            if (cover) {
+                cover.style.display = "block";
+            }
+        }
+
+        function playIOSVideo() {
+            const video = document.getElementById("ios-install-video");
+            const cover = document.getElementById("ios-video-cover");
+
+            if (cover) cover.style.display = "none";
+
+            if (video) {
+                video.classList.add("show");
+                video.play().catch(() => {});
+            }
+        }
+
         function closeIOSGuide() {
-            document.getElementById("ios-guide").classList.remove("show");
+            const guide = document.getElementById("ios-guide");
+            const video = document.getElementById("ios-install-video");
+            const cover = document.getElementById("ios-video-cover");
+
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+                video.classList.remove("show");
+            }
+
+            if (cover) {
+                cover.style.display = "block";
+            }
+
+            guide.classList.remove("show");
             localStorage.setItem("iosGuideShown", "true");
         }
 
         document.getElementById("ios-guide").onclick = function (e) {
             if (e.target === this) closeIOSGuide();
         };
-
-        function openIOSInstallGuide() {
-            document.getElementById("ios-guide").classList.add("show");
-            const video = document.getElementById("ios-install-video");
-            if (video) {
-                video.currentTime = 0;
-            }
-        }
 
         function shareToFriend(type, foodName = "") {
             let text = "";
@@ -858,6 +997,39 @@
             if (confirm(confirmMsg)) {
                 const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
                 window.location.href = lineUrl;
+            }
+        }
+
+        function shareDownloadPage() {
+            const downloadUrl = "https://freddychen1225.github.io/food-radar-android/download.html";
+            const text = `這是美食雷達 V3.6 的 Android 下載頁，裡面有中文安裝說明，給你參考：\n\n${downloadUrl}`;
+            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+
+            console.log("Android 分享文字：", text);
+            console.log("LINE 分享連結：", lineUrl);
+
+            if (ANDROID_SHARE_TEST_MODE) {
+                alert(
+                    "【測試模式】目前不直接開啟 LINE。\n\n" +
+                    "準備分享的訊息如下：\n\n" +
+                    text +
+                    "\n\n----------------------\nLINE 分享連結：\n" +
+                    lineUrl
+                );
+                return;
+            }
+
+            const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
+            if (confirm(confirmMsg)) {
+                window.location.href = lineUrl;
+            }
+        }
+
+        function handleFooterShare() {
+            if (isAndroid) {
+                shareDownloadPage();
+            } else {
+                shareToFriend("general");
             }
         }
 
@@ -894,7 +1066,7 @@
                         </div>
                     </div>
                     <div class="smart-cta-actions">
-                        <button class="smart-cta-btn green" onclick="shareToFriend('general')">💬 立即推薦朋友</button>
+                        <button class="smart-cta-btn green" onclick="handleFooterShare()">💬 立即推薦朋友</button>
                         <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">👀 看更多作品</a>
                     </div>
                     <div class="smart-cta-note">後續可把這裡換成合作推薦、小收益連結或品牌展示入口。</div>
@@ -931,36 +1103,11 @@
                     </div>
                 </div>
                 <div class="smart-cta-actions">
-                    <button class="smart-cta-btn" onclick="shareToFriend('general')">💬 推薦朋友</button>
+                    <button class="smart-cta-btn" onclick="handleFooterShare()">💬 推薦朋友</button>
                     <a class="smart-cta-link" href="download.html">📥 APK 下載頁</a>
                 </div>
                 <div class="smart-cta-note">* 後續可在不影響主功能的前提下，加入合作推薦連結與揭露文字。</div>
             `;
-        }
-
-        function shareDownloadPage() {
-            const downloadUrl = "https://freddychen1225.github.io/food-radar-android/download.html";
-            const text = `這是美食雷達 V3.6 的 Android 下載頁，裡面有中文安裝說明，給你參考：\n\n${downloadUrl}`;
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-
-            console.log("Android 分享文字：", text);
-            console.log("LINE 分享連結：", lineUrl);
-
-            if (ANDROID_SHARE_TEST_MODE) {
-                alert(
-                    "【測試模式】目前不直接開啟 LINE。\n\n" +
-                    "準備分享的訊息如下：\n\n" +
-                    text +
-                    "\n\n----------------------\nLINE 分享連結：\n" +
-                    lineUrl
-                );
-                return;
-            }
-
-            const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
-            if (confirm(confirmMsg)) {
-                window.location.href = lineUrl;
-            }
         }
 
         function switchMode(mode) {
