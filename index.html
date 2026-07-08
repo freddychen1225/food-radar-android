@@ -294,14 +294,7 @@
             flex-wrap: wrap;
         }
 
-        @keyframes pulse-btn {
-            0% { transform: scale(1); box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3); }
-            50% { transform: scale(1.05); box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5); }
-            100% { transform: scale(1); box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3); }
-        }
-
-        .share-btn-footer,
-        .support-btn-footer {
+        .share-btn-footer {
             background-color: var(--line-color);
             color: white;
             border: none;
@@ -315,17 +308,6 @@
             gap: 5px;
             box-shadow: 0 2px 8px rgba(6, 199, 85, 0.3);
             transition: all 0.2s;
-        }
-
-        .support-btn-footer {
-            background-color: #ff6b6b;
-            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-            animation: pulse-btn 2s infinite ease-in-out;
-        }
-
-        .support-btn-footer:hover {
-            animation: none;
-            transform: scale(1.05);
         }
 
         .footer-credit {
@@ -430,39 +412,6 @@
             color: #007aff;
         }
 
-        @keyframes popIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .support-modal-content {
-            animation: popIn 0.3s ease-out;
-            background: white;
-            width: 100%;
-            max-width: 380px;
-            padding: 25px;
-            border-radius: 16px;
-            position: relative;
-        }
-
-        .support-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #aaa;
-            line-height: 20px;
-        }
-
-        .support-box {
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            border: 1px solid #eee;
-            text-align: center;
-        }
-
         .sr-only {
             position: absolute;
             width: 1px;
@@ -478,10 +427,6 @@
         @media (max-width: 480px) {
             body {
                 padding: 16px;
-            }
-
-            .grid-container {
-                grid-template-columns: repeat(2, 1fr);
             }
 
             .grid-container.scenarios {
@@ -552,9 +497,6 @@
             <button class="share-btn-footer" onclick="shareToFriend('general')">
                 💬 推薦朋友
             </button>
-            <button class="support-btn-footer" onclick="openSupportModal()">
-                ☕ 支持作者
-            </button>
         </div>
         <div class="footer-credit">
             <a href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">Freddy</a> & Gemini 3 Pro 設計協作
@@ -599,73 +541,7 @@
         </div>
     </div>
 
-    <div id="supportModal" class="overlay">
-        <div class="support-modal-content" onclick="event.stopPropagation()">
-            <div class="support-close" onclick="closeSupportModal()">&times;</div>
-            <h3 style="margin: 5px 0 10px; color: #333; text-align: center;">支持美食雷達 🎯</h3>
-
-            <div style="background: #fff8e1; border-radius: 10px; padding: 12px; margin-bottom: 15px; border: 1px solid #ffe082;">
-                <p style="text-align: center; color: #f57c00; font-weight: bold; margin: 0 0 8px; font-size: 14px;">
-                    👇 請選擇您想贊助的心意 👇
-                </p>
-                <div style="display: flex; justify-content: space-between; gap: 5px; font-size: 13px; color: #555;">
-                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 1px solid #eee;">
-                        🍵 青茶<br><strong style="color: #ff6b6b; font-size: 15px;">$30</strong>
-                    </div>
-                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 2px solid #ff6b6b; position: relative;">
-                        <span style="position: absolute; top: -8px; right: -5px; background: #ff6b6b; color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px;">推薦</span>
-                        🍚 滷肉飯<br><strong style="color: #ff6b6b; font-size: 15px;">$60</strong>
-                    </div>
-                    <div style="flex: 1; text-align: center; background: white; padding: 8px 2px; border-radius: 6px; border: 1px solid #eee;">
-                        🍱 便當<br><strong style="color: #ff6b6b; font-size: 15px;">$100</strong>
-                    </div>
-                </div>
-                <p style="font-size: 11px; color: #999; text-align: center; margin: 8px 0 0;">
-                    當然，任何金額都是巨大的鼓勵！❤️
-                </p>
-            </div>
-
-            <div class="support-box" style="background: #FFF0F0; border-color: #FFD0D0;">
-                <div style="font-weight: bold; color: #D02020; margin-bottom: 8px; font-size: 15px;">街口支付 JKOPay</div>
-
-                <a id="jkoLink" href="#" style="text-decoration: none;">
-                    <button type="button" style="width: 100%; background: #E63838; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px;">
-                        <span>🚀 開啟街口 APP 贊助</span>
-                    </button>
-                </a>
-
-                <div style="font-size: 13px; color: #888; margin-top: 10px;">
-                    <span id="qrHint" style="font-weight: bold; color: #d02020;">[ 請打開街口支付掃描 ]</span><br>
-                    <img src="./images/jko_qr.jpg" alt="街口 QR Code" style="width: 140px; margin-top: 8px; border-radius: 8px; border: 1px solid #eee;">
-                    <div style="font-size: 12px; color: #999; margin-top: 6px; line-height: 1.4;">
-                        手機可截圖存至相簿<br>
-                        再由街口 APP 打開掃描讀取照片
-                    </div>
-                </div>
-            </div>
-
-            <div class="support-box" style="background: #F0F7FF; border-color: #D0E0FF;">
-                <div style="font-weight: bold; color: #0066CC; margin-bottom: 8px; font-size: 15px;">銀行轉帳</div>
-
-                <div style="background: white; padding: 10px; border-radius: 6px; border: 1px dashed #B0C4DE; text-align: left; margin-bottom: 8px;">
-                    <div style="font-size: 14px; color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 5px;">
-                        銀行代碼請選：<strong style="color: #d63031; font-size: 16px;">108 陽信銀行</strong>
-                    </div>
-
-                    <div style="font-size: 12px; color: #666; margin-top: 4px;">銀行帳號：</div>
-                    <div id="bankAccount" style="font-size: 18px; font-weight: bold; color: #333; letter-spacing: 1px; font-family: monospace;">036027500401</div>
-                </div>
-
-                <button onclick="copyAccount()" style="width: 100%; background: #0066CC; color: white; border: none; padding: 10px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: bold;">
-                    📋 複製帳號
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        const myTwqrString = "TWQRP%3a%2f%2f%e5%80%8b%e4%ba%ba%e8%bd%89%e5%b8%b3%2f158%2f02%2fV1%3fD5%3d396%26D6%3d0000000900615072%26D10%3d901%26D97%3d20251212151945%26D98%3d39601527998570300000001%26D99%3dABA414E1";
-
         const mealCategories = [
             { name: "牛肉麵", icon: "🍜" },
             { name: "便當簡餐", icon: "🍱" },
@@ -717,11 +593,6 @@
         document.addEventListener("DOMContentLoaded", function () {
             renderCuisines(mealCategories);
 
-            const jkoLink = document.getElementById("jkoLink");
-            if (jkoLink) {
-                jkoLink.style.display = "none";
-            }
-
             window.addEventListener("appinstalled", () => {
                 if (/Android/i.test(navigator.userAgent)) {
                     document.getElementById("android-guide").classList.add("show");
@@ -739,7 +610,6 @@
                     navigator.serviceWorker.register("./sw.js")
                         .then((registration) => {
                             console.log("SW registered:", registration.scope);
-
                             registration.onupdatefound = function () {
                                 console.log("Service Worker update found.");
                             };
@@ -781,27 +651,6 @@
             document.getElementById("ios-guide").classList.remove("show");
             localStorage.setItem("iosGuideShown", "true");
         }
-
-        function openSupportModal() {
-            document.getElementById("supportModal").classList.add("show");
-        }
-
-        function closeSupportModal() {
-            document.getElementById("supportModal").classList.remove("show");
-        }
-
-        function copyAccount() {
-            const text = document.getElementById("bankAccount").innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert("✅ 帳號已複製！\n請打開網銀 App 或 LINE Pay 進行轉帳");
-            }).catch(() => {
-                alert("❌ 複製失敗，請長按帳號手動複製");
-            });
-        }
-
-        document.getElementById("supportModal").onclick = function (e) {
-            if (e.target === this) closeSupportModal();
-        };
 
         document.getElementById("ios-guide").onclick = function (e) {
             if (e.target === this) closeIOSGuide();
