@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
+
     <title>美食雷達 V3.6</title>
 
     <meta name="description" content="美食雷達 V3.6 (Food Radar) 是一款免費的 Google Maps 智慧搜尋工具。解決今天吃什麼的煩惱，提供隨機美食推薦、平價正餐搜尋及下午茶點心建議。">
@@ -515,7 +515,7 @@
 
         #ios-guide {
             align-items: flex-start;
-            padding: max(24px, env(safe-area-inset-top) + 18px) 16px 24px;
+            padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 24px;
             overflow-y: auto;
         }
 
@@ -524,7 +524,7 @@
             margin: 0 auto;
             margin-top: 18px;
             max-width: 380px;
-            max-height: calc(100dvh - env(safe-area-inset-top) - 40px);
+            max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 40px);
             overflow-y: auto;
             border-radius: 20px;
         }
@@ -668,7 +668,7 @@
             }
 
             #ios-guide {
-                padding: max(18px, env(safe-area-inset-top) + 12px) 12px 20px;
+                padding: calc(12px + env(safe-area-inset-top, 0px)) 12px 20px;
             }
 
             #ios-guide .modal-card {
@@ -858,9 +858,6 @@
         const isAndroid = /Android/i.test(navigator.userAgent);
         const SHARE_URL = "https://freddychen1225.github.io/food-radar-android/?openExternalBrowser=1";
 
-        /* Android 測試模式：true = 先顯示測試訊息，不直接跳 LINE */
-        const ANDROID_SHARE_TEST_MODE = true;
-
         document.addEventListener("DOMContentLoaded", function () {
             renderCuisines(mealCategories);
 
@@ -1003,24 +1000,10 @@
         function shareDownloadPage() {
             const downloadUrl = "https://freddychen1225.github.io/food-radar-android/download.html";
             const text = `這是美食雷達 V3.6 的 Android 下載頁，裡面有中文安裝說明，給你參考：\n\n${downloadUrl}`;
-            const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-
-            console.log("Android 分享文字：", text);
-            console.log("LINE 分享連結：", lineUrl);
-
-            if (ANDROID_SHARE_TEST_MODE) {
-                alert(
-                    "【測試模式】目前不直接開啟 LINE。\n\n" +
-                    "準備分享的訊息如下：\n\n" +
-                    text +
-                    "\n\n----------------------\nLINE 分享連結：\n" +
-                    lineUrl
-                );
-                return;
-            }
-
             const confirmMsg = `您即將傳送 Android APK 下載頁給朋友。\n\n確定要開啟 LINE 嗎？`;
+
             if (confirm(confirmMsg)) {
+                const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
                 window.location.href = lineUrl;
             }
         }
@@ -1041,16 +1024,16 @@
                     <div class="smart-cta-top">
                         <div class="smart-cta-icon">📱</div>
                         <div class="smart-cta-content">
-                            <div class="smart-cta-label">自家推薦</div>
-                            <div class="smart-cta-title">加入 iPhone 主畫面，像 App 一樣直接打開</div>
-                            <div class="smart-cta-desc">下次肚子餓時，不用再打開 Safari 找網址，從桌面一點就能用。</div>
+                            <div class="smart-cta-label">iPhone 建議</div>
+                            <div class="smart-cta-title">加入主畫面後，會更像 App 一樣順手</div>
+                            <div class="smart-cta-desc">你可以先直接試用；喜歡這個工具，再把它加入 iPhone 主畫面也不遲。</div>
                         </div>
                     </div>
                     <div class="smart-cta-actions">
-                        <button class="smart-cta-btn" onclick="openIOSInstallGuide()">立即查看加入教學</button>
+                        <button class="smart-cta-btn" onclick="openIOSInstallGuide()">查看 iPhone 安裝教學</button>
                         <button class="smart-cta-link" onclick="shareToFriend('general')">💬 推薦朋友</button>
                     </div>
-                    <div class="smart-cta-note">這個版位會依裝置顯示不同內容，之後也可加入合作推薦入口。</div>
+                    <div class="smart-cta-note">先體驗、再決定是否加入主畫面，流程更自然。</div>
                 `;
                 return;
             }
@@ -1060,16 +1043,16 @@
                     <div class="smart-cta-top">
                         <div class="smart-cta-icon">💬</div>
                         <div class="smart-cta-content">
-                            <div class="smart-cta-label">自家推薦</div>
-                            <div class="smart-cta-title">已經安裝好了，順手分享給也有選擇障礙的朋友</div>
-                            <div class="smart-cta-desc">你現在用的就是桌面版體驗，把它分享出去，就是最直接的成效展示。</div>
+                            <div class="smart-cta-label">已安裝完成</div>
+                            <div class="smart-cta-title">你現在用的就是桌面版體驗，順手分享給朋友吧</div>
+                            <div class="smart-cta-desc">把工具分享出去，就是最直接的成果展示；朋友打開後也能先直接體驗。</div>
                         </div>
                     </div>
                     <div class="smart-cta-actions">
                         <button class="smart-cta-btn green" onclick="handleFooterShare()">💬 立即推薦朋友</button>
                         <a class="smart-cta-link" href="https://www.threads.net/@freddychen1225" target="_blank" rel="noopener noreferrer">👀 看更多作品</a>
                     </div>
-                    <div class="smart-cta-note">後續可把這裡換成合作推薦、小收益連結或品牌展示入口。</div>
+                    <div class="smart-cta-note">後續也能把這裡延伸成合作推薦或自家產品入口。</div>
                 `;
                 return;
             }
@@ -1077,18 +1060,18 @@
             if (isAndroid) {
                 card.innerHTML = `
                     <div class="smart-cta-top">
-                        <div class="smart-cta-icon">📦</div>
+                        <div class="smart-cta-icon">🤖</div>
                         <div class="smart-cta-content">
-                            <div class="smart-cta-label">Android 專屬</div>
-                            <div class="smart-cta-title">想分享給 Android 朋友？這裡有中文 APK 下載頁</div>
-                            <div class="smart-cta-desc">用中文說明下載與安裝流程，比直接進英文頁面更容易理解。</div>
+                            <div class="smart-cta-label">Android 友善入口</div>
+                            <div class="smart-cta-title">先直接試用這個工具，想裝成 App 再下載 APK</div>
+                            <div class="smart-cta-desc">不用一開始就做決定；先玩看看美食搜尋流程，喜歡這個體驗再安裝成 App。</div>
                         </div>
                     </div>
                     <div class="smart-cta-actions">
-                        <a class="smart-cta-btn green" href="download.html">📥 前往 APK 下載頁</a>
-                        <button class="smart-cta-link" onclick="shareDownloadPage()">💬 測試 / 傳給朋友</button>
+                        <a class="smart-cta-btn green" href="download.html">📥 想安裝再下載 APK</a>
+                        <button class="smart-cta-link" onclick="shareDownloadPage()">💬 傳 APK 頁給 Android 朋友</button>
                     </div>
-                    <div class="smart-cta-note">若手機尚未安裝 LINE，目前會先顯示測試訊息內容與最終分享網址。</div>
+                    <div class="smart-cta-note">體驗優先，不強制跳下載頁；想安裝時再進 APK 中文說明頁即可。</div>
                 `;
                 return;
             }
@@ -1098,15 +1081,15 @@
                     <div class="smart-cta-icon">✨</div>
                     <div class="smart-cta-content">
                         <div class="smart-cta-label">自家推薦</div>
-                        <div class="smart-cta-title">這是一個可同時服務網頁、PWA 與 APK 的美食小工具</div>
-                        <div class="smart-cta-desc">你現在看到的是示範型自家 CTA 版位，之後可延伸成合作推薦與變現入口。</div>
+                        <div class="smart-cta-title">這是一個打開就能用的美食小工具</div>
+                        <div class="smart-cta-desc">先直接體驗搜尋功能；之後如果是 Android 使用者，也可以選擇安裝 APK 版本。</div>
                     </div>
                 </div>
                 <div class="smart-cta-actions">
-                    <button class="smart-cta-btn" onclick="handleFooterShare()">💬 推薦朋友</button>
-                    <a class="smart-cta-link" href="download.html">📥 APK 下載頁</a>
+                    <button class="smart-cta-btn" onclick="shareToFriend('general')">💬 推薦朋友</button>
+                    <a class="smart-cta-link" href="download.html">📥 Android APK 頁</a>
                 </div>
-                <div class="smart-cta-note">* 後續可在不影響主功能的前提下，加入合作推薦連結與揭露文字。</div>
+                <div class="smart-cta-note">維持首頁體驗優先，安裝引導放在願意進一步了解的節點。</div>
             `;
         }
 
